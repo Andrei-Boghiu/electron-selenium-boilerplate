@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <link href="style.css" rel="stylesheet" />
+    <script defer src="./app.js"></script>
+    <title>Electron Selenium App</title>
+  </head>
+  <body>
+    <h1>Getting ready</h1>
+    <!-- Form to insert data -->
+    <div id="login">
+      <p>Please fill in the needed information.</p>
+      <!-- Link -->
+      <label for="link">link</label>
+      <input type="text" id="link" name="link" />
+      <!-- search query -->
+      <label for="search-query">Search Query</label>
+      <input type="text" id="search-query" name="search-query" />
+      <!-- another item -->
+      <label for="test">Test</label>
+      <input type="text" id="test" name="test" />
+      <!-- Start Button -->
+      <button id="start">Start</button>
+    </div>
+
+    <!-- modal to display information -->
+    <div class="modal-container" id="modalContainer">
+      <div class="modal">
+        <h2>Modal Title</h2>
+        <p>This is the modal content.</p>
+        <button id="ok">Ok</button>
+      </div>
+    </div>
+
+    <!-- Dashboard containing action and error logs -->
+    <div id="dashboard" hidden>
+      <h1>Dashboard</h1>
+      <div id="logs"></div>
+    </div>
+  </body>
+</html>
