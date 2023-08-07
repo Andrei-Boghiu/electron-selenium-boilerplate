@@ -1,61 +1,109 @@
-const link = document.querySelector("#link");
-const searchQuery = document.querySelector("#search-query");
-const test = document.querySelector("#test");
-const startBtn = document.querySelector("#start");
-const loginBox = document.querySelector("#login");
-const dashboard = document.querySelector("#dashboard");
-const logs = document.querySelector("#logs");
+// Selectors
+const loginContainer = document.querySelector(".login-container");
+const dashboardContainer = document.querySelector(".dashboard-container");
+const modalContainer = document.querySelector(".modal-container");
+const loadingContainer = document.querySelector(".loading-container");
+const logsContainer = document.querySelector(".log-container");
 
-// default values
-link.value =
-  localStorage.getItem("last-used-link") ?? "https://www.google.com/";
+// buttons
+const startAutomation = document.querySelector("#start-automation");
+const stopAutomation = document.querySelector("#stop-automation");
+const form = document.querySelector("form#login");
 
-searchQuery.value =
-  localStorage.getItem("last-used-query") ?? "Get rich quick schemes";
+// user inputs
+const user = document.querySelector("#username");
+const link = document.querySelector("#url");
+const query = document.querySelector("#search-query");
 
-function getValues() {
-  let searchQueryValue = searchQuery.value;
-  let linkVale = link.value;
-  let testValue = test.value;
+// set last used inputs
+user.value = localStorage.getItem("last-used-username") ?? "";
+link.value = localStorage.getItem("last-used-url") ?? "";
+query.value = localStorage.getItem("last-used-searchQuery") ?? "";
 
-  return { searchQueryValue, linkVale, testValue };
-}
+// Prevent default event to handle it with the click event
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+});
 
-document
-  .querySelector("#modalContainer button#ok")
-  .addEventListener("click", () => {
-    const modalContainer = document.getElementById("modalContainer");
-    modalContainer.style.display = "none";
-  });
+startAutomation.addEventListener("click", () => {
+  if (form.checkValidity()) {
+    // get values
+    const username = user.value;
+    const url = link.value;
+    const searchQuery = query.value;
+    const values = { username, url, searchQuery };
 
-startBtn.addEventListener("click", () => {
-  if (link.value && searchQuery.value && test.value) {
-    const values = getValues();
-    console.log(values);
+    // set new values to be remembered for next time
+    localStorage.setItem("last-used-username", username);
+    localStorage.setItem("last-used-url", url);
+    localStorage.setItem("last-used-searchQuery", searchQuery);
 
-    localStorage.setItem("last-used-query", values.searchQueryValue);
+    // show loading screen
+    loginContainer.style.display = "none"; // flex by default
+    loadingContainer.style.display = "block";
 
-    // send data in main.js and main.js will send it in preload.js
+    // send message to start automation (app.js -> main.js -> preload.js)
     contextBridgeIpcRenderer.ipcRenderer.send(
-      "start-selenium-automation",
+      "start-selenium-automation-to-main",
       values
     );
 
-    loginBox.setAttribute("hidden", "");
-    dashboard.removeAttribute("hidden");
-  } else {
-    const modalContainer = document.querySelector("#modalContainer");
-    modalContainer.querySelector("h2").innerText = "Warning";
-    modalContainer.querySelector("p").innerText =
-      "Please fill in all needed information before starting";
-    modalContainer.style.display = "flex";
+    // wait for a success response and show the dashboard (app.js <- main.js <- preload.js)
+    contextBridgeIpcRenderer.ipcRenderer.on(
+      "start-selenium-automation-success-to-renderer",
+      (e, data) => {
+        loadingContainer.style.display = "none";
+        dashboardContainer.style.display = "block";
+      }
+    );
   }
 });
 
-contextBridgeIpcRenderer.ipcRenderer.on("info-for-logs", (e, data) => {
-  console.log("info-for-logs received in renderer app");
-  const newLog = document.createElement("p");
-  newLog.textContent = data;
+stopAutomation.addEventListener("click", () => {
+  // show loading screen
+  dashboardContainer.style.display = "none";
+  loadingContainer.style.display = "block";
 
-  logs.appendChild(newLog);
+  // send command to stop
+  contextBridgeIpcRenderer.ipcRenderer.send(
+    "stop-selenium-automation-to-main",
+    "stop"
+  );
+
+  // show login when confirmation positive
+  contextBridgeIpcRenderer.ipcRenderer.on(
+    "stop-selenium-automation-to-renderer",
+    (e, data) => {
+      setTimeout(() => {
+        loadingContainer.style.display = "none";
+        loginContainer.style.display = "flex";
+      }, 700);
+    }
+  );
+});
+
+// Receive logs from preload
+contextBridgeIpcRenderer.ipcRenderer.on(
+  "info-for-logs-to-renderer",
+  (e, data) => {
+    const newLog = document.createElement("div");
+    newLog.classList = `log-entry ${data.logType}`;
+    newLog.textContent = data.info;
+    logsContainer.appendChild(newLog);
+    // to also send a notification if logType === failure
+  }
+);
+
+// Forgot password click handler
+document.querySelector("#forgot-password").addEventListener("click", () => {
+  modalContainer.querySelector("h2").innerText = "Don't worry";
+  modalContainer.querySelector("p").innerText =
+    "Just stay calm and try to remember your password";
+  modalContainer.style.display = "flex";
+  loginContainer.style.display = "none";
+
+  document.querySelector("#modal-btn").addEventListener("click", () => {
+    modalContainer.style.display = "none";
+    loginContainer.style.display = "flex";
+  });
 });
