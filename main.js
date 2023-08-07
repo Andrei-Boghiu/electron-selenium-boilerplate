@@ -9,7 +9,7 @@ let mainWindow;
 function createMainWindow() {
   // window state keeper
   let state = windowStateKeeper({
-    defaultWidth: 100,
+    defaultWidth: 800,
     defaultHeight: 650,
   });
 
@@ -34,26 +34,39 @@ function createMainWindow() {
   state.manage(mainWindow);
 
   // Open Dev Tools - To Be Removed for Production
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
 
-  // // listening for ipcRenderer request from renderer app.js to send in preload.js
-  ipcMain.on("start-selenium-automation", (e, data) => {
-    console.log(data);
-    console.log("data received in main process:" + data);
-
+  // listening for ipcRenderer request from renderer app.js to send in preload.js
+  ipcMain.on("start-selenium-automation-to-main", (e, data) => {
     // send it to preload.js
-    mainWindow.webContents.send("start-selenium-data", data);
+    mainWindow.webContents.send("start-selenium-automation-to-preload", data);
   });
 
-  ipcMain.on("info-for-logs", (e, data) => {
-    console.log("info-for-logs received in main.js:");
-    console.log(data);
+  ipcMain.on("start-selenium-automation-success-to-main", (e, data) => {
+    mainWindow.webContents.send(
+      "start-selenium-automation-success-to-renderer",
+      data
+    );
+  });
 
-    mainWindow.webContents.send("info-for-logs", data);
+  // (app -> main -> preload)
+  ipcMain.on("stop-selenium-automation-to-main", (e, data) => {
+    // send it to preload.js
+    mainWindow.webContents.send("stop-selenium-automation-to-preload", data);
+  });
+
+  // (app <- main <- preload)
+  ipcMain.on("stop-selenium-automation-to-main", (e, data) => {
+    mainWindow.webContents.send("stop-selenium-automation-to-renderer", data);
+  });
+
+  ipcMain.on("info-for-logs-to-main", (e, data) => {
+    mainWindow.webContents.send("info-for-logs-to-renderer", data);
   });
 
   // Listen for the window being closed
   mainWindow.on("close", () => {
+    mainWindow.webContents.send("stop-selenium-automation-to-preload", "stop");
     mainWindow = null;
   });
 }
