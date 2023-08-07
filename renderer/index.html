@@ -12,36 +12,76 @@
     <title>Electron Selenium App</title>
   </head>
   <body>
-    <h1>Getting ready</h1>
-    <!-- Form to insert data -->
-    <div id="login">
-      <p>Please fill in the needed information.</p>
-      <!-- Link -->
-      <label for="link">link</label>
-      <input type="text" id="link" name="link" />
-      <!-- search query -->
-      <label for="search-query">Search Query</label>
-      <input type="text" id="search-query" name="search-query" />
-      <!-- another item -->
-      <label for="test">Test</label>
-      <input type="text" id="test" name="test" />
-      <!-- Start Button -->
-      <button id="start">Start</button>
+    <div class="login-container">
+      <div class="login-card">
+        <h2>Welcome to Selenium</h2>
+        <form id="login">
+          <div class="input-container">
+            <input
+              type="text"
+              id="username"
+              placeholder="Enter your username"
+              required
+            />
+          </div>
+          <div class="input-container">
+            <input
+              type="url"
+              id="url"
+              placeholder="Enter your google url"
+              required
+            />
+          </div>
+          <div class="input-container">
+            <input
+              type="text"
+              id="search-query"
+              placeholder="Enter your search query"
+              required
+            />
+          </div>
+          <button type="submit" id="start-automation">Start Automation</button>
+          <p id="forgot-password">Forgot your password?</p>
+        </form>
+      </div>
     </div>
 
     <!-- modal to display information -->
-    <div class="modal-container" id="modalContainer">
-      <div class="modal">
+    <div class="modal-container">
+      <div class="modal-card">
         <h2>Modal Title</h2>
         <p>This is the modal content.</p>
-        <button id="ok">Ok</button>
+        <button id="modal-btn">Ok</button>
+      </div>
+    </div>
+
+    <!-- loading -->
+    <div class="loading-container">
+      <div class="modal-card">
+        <h2></h2>
+        <p></p>
+        <img src="loading.svg" />
       </div>
     </div>
 
     <!-- Dashboard containing action and error logs -->
-    <div id="dashboard" hidden>
-      <h1>Dashboard</h1>
-      <div id="logs"></div>
+    <div class="dashboard-container">
+      <h1>Selenium Automation Log Dashboard</h1>
+      <div class="log-container">
+        <!-- Log entries will be dynamically populated here -->
+        <!-- Example: -->
+        <div class="log-entry success">[Timestamp] Action X was successful</div>
+        <div class="log-entry failure">
+          [Timestamp] Action Y failed: Error message
+        </div>
+        <div class="log-entry failure">
+          [Timestamp] Action Y failed: Error message
+        </div>
+        <div class="log-entry failure">
+          [Timestamp] Action Y failed: Error message
+        </div>
+      </div>
+      <button id="stop-automation">Stop</button>
     </div>
   </body>
 </html>
