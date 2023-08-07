@@ -15,20 +15,35 @@ contextBridge.exposeInMainWorld("contextBridgeIpcRenderer", {
   },
 });
 
+// logType: success / failure
+function sendLog(logType, info) {
+  ipcRenderer.send("info-for-logs-to-main", { logType, info });
+}
+
 // Listener receiving data from main.js that comes from renderer app
-ipcRenderer.on("start-selenium-data", (e, data) => {
+ipcRenderer.on("start-selenium-automation-to-preload", (e, data) => {
   console.log("message received in preload:");
   console.log(data);
-  console.log(data.linkVale);
-  console.log(data.searchQueryValue);
-  console.log(data.testValue);
+  console.log(data.username);
+  console.log(data.url);
+  console.log(data.searchQuery);
 
   (async function automation() {
     let driver = await new Builder().forBrowser(Browser.CHROME).build();
 
-    await driver.get(`${data.linkVale}`);
+    sendLog("success", "Selenium instance launched successfully");
 
-    ipcRenderer.send("info-for-logs", "Link loaded successfully");
+    // tell the app that selenium launched successfully
+    ipcRenderer.send("start-selenium-automation-success-to-main", "Success");
+    // listen for stop command
+    ipcRenderer.on("stop-selenium-automation-to-preload", async (e, data) => {
+      await driver.quit();
+      ipcRenderer.send("stop-selenium-automation-to-main", "Success");
+    });
+
+    await driver.get(`${data.url}`);
+
+    sendLog("success", "Search on google performed successfully");
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
@@ -38,41 +53,7 @@ ipcRenderer.on("start-selenium-data", (e, data) => {
 
     await driver
       .findElement(By.css("[name='q']"))
-      .sendKeys(`${data.searchQueryValue}`, Key.RETURN);
+      .sendKeys(`${data.searchQuery}`, Key.RETURN);
+    sendLog("success", "No matching results found");
   })();
 });
-
-// Second possible method to run the automation in renderer app (not recommended)
-// contextBridge.exposeInMainWorld("mySeleniumAPI", {
-//   driver: {
-//     navigate: async (url) => {
-//       await driver.navigate().to(url);
-//     },
-//     findElement: async (selector) => {
-//       return await driver.findElement(By.css(selector));
-//     },
-//     findElements: async (selector) => {
-//       return await driver.findElements(By.css(selector));
-//     },
-//     click: async (element) => {
-//       await element.click();
-//     },
-//     sendKeys: async (element, keys) => {
-//       await element.sendKeys(keys);
-//     },
-//     getText: async (element) => {
-//       return await element.getText();
-//     },
-//     getTitle: async () => {
-//       return await driver.getTitle();
-//     },
-//     waitForElement: async (selector, timeout = 5000) => {
-//       const element = await driver.wait(
-//         until.elementLocated(By.css(selector)),
-//         timeout
-//       );
-//       return await driver.wait(until.elementIsVisible(element), timeout);
-//     },
-//     // Add other necessary methods from the Selenium WebDriver API
-//   },
-// });
