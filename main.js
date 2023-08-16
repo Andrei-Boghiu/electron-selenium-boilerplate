@@ -1,6 +1,6 @@
 // Modules
 const { app, BrowserWindow, ipcMain } = require("electron");
-const windowStateKeeper = require("electron-window-state");
+//const windowStateKeeper = require("electron-window-state");
 const path = require("path");
 
 // global reference of the window object
@@ -8,16 +8,16 @@ let mainWindow;
 
 function createMainWindow() {
   // window state keeper
-  let state = windowStateKeeper({
-    defaultWidth: 800,
-    defaultHeight: 650,
-  });
+  // let state = windowStateKeeper({
+  //   defaultWidth: 800,
+  //   defaultHeight: 650,
+  // });
 
   mainWindow = new BrowserWindow({
-    x: state.x,
-    y: state.y,
-    width: state.width,
-    height: state.height,
+    // x: state.x,
+    // y: state.y,
+    width: 700, //state.width,
+    height: 700, //state.height,
     minWidth: 600,
     minHeight: 400,
     webPreferences: {
@@ -29,9 +29,6 @@ function createMainWindow() {
 
   // load the html file into the new BrowserWindow
   mainWindow.loadFile(`renderer/index.html`);
-
-  // manage new window state
-  state.manage(mainWindow);
 
   // Open Dev Tools - To Be Removed for Production
   //mainWindow.webContents.openDevTools();
