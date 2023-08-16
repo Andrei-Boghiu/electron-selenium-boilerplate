@@ -4,16 +4,28 @@
   "description": "Boilerplate code for an electron app using the selenium webdriver",
   "main": "main.js",
   "scripts": {
-    "start": "nodemon --watch main.js --exec electron ."
+    "start": "nodemon --watch main.js --exec electron .",
+    "package": "electron-builder"
   },
   "author": "Andrei Boghiu",
   "license": "UNLICENSED",
   "devDependencies": {
     "electron": "^25.4.0",
+    "electron-builder": "^24.6.3",
     "nodemon": "^3.0.1"
   },
   "dependencies": {
-    "electron-window-state": "^5.0.3",
     "selenium-webdriver": "^4.11.1"
+  },
+  "build": {
+    "appId": "no.app.id",
+    "productName": "selenium Automation",
+    "asar": false,
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "portable"
+    }
   }
 }
